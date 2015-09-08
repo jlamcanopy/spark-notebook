@@ -1,17 +1,24 @@
 # Copyright (c) Jupyter Development Team.
 FROM jupyter/minimal-notebook
 
-MAINTAINER Jupyter Project <jupyter@googlegroups.com>
+MAINTAINER jlam
 
 USER root
+
+ENV REPO_URL http://deploy.clforest.com/dev/spark-notebook/
 
 # Spark dependencies
 ENV APACHE_SPARK_VERSION 1.4.1
 RUN apt-get -y update && \
     apt-get install -y --no-install-recommends openjdk-7-jre-headless && \
     apt-get clean
-RUN wget -qO - http://d3kbcqa49mib13.cloudfront.net/spark-${APACHE_SPARK_VERSION}-bin-hadoop2.6.tgz | tar -xz -C /usr/local/
+#RUN wget -qO - http://d3kbcqa49mib13.cloudfront.net/spark-${APACHE_SPARK_VERSION}-bin-hadoop2.6.tgz | tar -xz -C /usr/local/
+RUN wget -qO - ${REPO_URL}/spark.tgz | tar -xz -C /usr/local/
 RUN cd /usr/local && ln -s spark-${APACHE_SPARK_VERSION}-bin-hadoop2.6 spark
+
+# Hadoop AWS dependencies
+# TODO
+RUN wget -qO - ${REPO_URL}/hadoop-aws.tgz | tar -xz -C /usr/local/
 
 # Mesos dependencies
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF && \
