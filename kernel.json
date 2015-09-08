@@ -7,6 +7,5 @@
         "{connection_file}"
     ],
     "env": {
-        "SPARK_CONFIGURATION": ""
-    }
+        "SPARK_CONFIGURATION": "spark.jars=/usr/local/hadoop-aws/aws-java-sdk-1.7.4.jar,/usr/local/hadoop-aws/hadoop-aws-2.7.1.jar,/usr/local/hadoop-aws/hadoop-common-2.7.1.jar,/usr/local/hadoop-aws/httpclient-4.5.jar,/usr/local/hadoop-aws/httpcore-4.4.1.jar,/usr/local/hadoop-aws/jackson-annotations-2.2.3.jar,/usr/local/hadoop-aws/jackson-core-2.2.3.jar,/usr/local/hadoop-aws/jackson-databind-2.2.3.jar"}
 }
