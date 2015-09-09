@@ -1,20 +1,19 @@
 # Copyright (c) Jupyter Development Team.
 FROM jupyter/minimal-notebook
 
-MAINTAINER jlam
+MAINTAINER jlam@canopylabs.com
 
 USER root
 
 ENV REPO_URL http://deploy.clforest.com/dev/spark-notebook/
 
 # Spark dependencies
-ENV APACHE_SPARK_VERSION 1.4.1
+ENV APACHE_SPARK_VERSION 1.5.0
 RUN apt-get -y update && \
     apt-get install -y --no-install-recommends openjdk-7-jre-headless && \
     apt-get clean
-#RUN wget -qO - http://d3kbcqa49mib13.cloudfront.net/spark-${APACHE_SPARK_VERSION}-bin-hadoop2.6.tgz | tar -xz -C /usr/local/
 RUN wget -qO - ${REPO_URL}/spark.tgz | tar -xz -C /usr/local/
-RUN cd /usr/local && ln -s spark-${APACHE_SPARK_VERSION}-bin-hadoop2.6 spark
+RUN cd /usr/local && ln -s spark-1.5.0 spark
 
 # Hadoop AWS dependencies
 # TODO
@@ -31,17 +30,24 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF && \
 
 # Scala Spark kernel (build and cleanup)
 RUN cd /tmp && \
-    echo deb http://dl.bintray.com/sbt/debian / > /etc/apt/sources.list.d/sbt.list && \
+    echo "deb http://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list && \
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823 && \
     apt-get update && \
+    apt-get install -yq --force-yes --no-install-recommends sbt=0.13.7 && \
+    sbt
+RUN mkdir -p /root/.sbt && \
+    printf "[repositories]\nmy-maven-repo: http://repo1.maven.org/maven2" > /root/.sbt/repositories
+RUN cd /tmp && \
     git clone https://github.com/ibm-et/spark-kernel.git && \
-    apt-get install -yq --force-yes --no-install-recommends sbt && \
     cd spark-kernel && \
     sbt compile -Xms1024M \
         -Xmx2048M \
         -Xss1M \
         -XX:+CMSClassUnloadingEnabled \
         -XX:MaxPermSize=1024M && \
-    sbt pack && \
+    sbt pack
+# clean up
+RUN cd /tmp && \
     mv kernel/target/pack /opt/sparkkernel && \
     chmod +x /opt/sparkkernel && \
     rm -rf ~/.ivy2 && \
