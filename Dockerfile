@@ -12,8 +12,8 @@ ENV APACHE_SPARK_VERSION 1.5.0
 RUN apt-get -y update && \
     apt-get install -y --no-install-recommends openjdk-7-jre-headless && \
     apt-get clean
-RUN wget -qO - ${REPO_URL}/spark.tgz | tar -xz -C /usr/local/
-RUN cd /usr/local && ln -s spark-1.5.0 spark
+RUN wget -qO - http://d3kbcqa49mib13.cloudfront.net/spark-${APACHE_SPARK_VERSION}-bin-hadoop2.6.tgz | tar -xz -C /usr/local/
+RUN cd /usr/local && ln -s spark-${APACHE_SPARK_VERSION}-bin-hadoop2.6 spark
 
 # Hadoop AWS dependencies
 # TODO
@@ -35,8 +35,8 @@ RUN cd /tmp && \
     apt-get update && \
     apt-get install -yq --force-yes --no-install-recommends sbt=0.13.7 && \
     sbt
-RUN mkdir -p /root/.sbt && \
-    printf "[repositories]\nmy-maven-repo: http://repo1.maven.org/maven2" > /root/.sbt/repositories
+#RUN mkdir -p /root/.sbt && \
+#    printf "[repositories]\nmy-maven-repo: http://repo1.maven.org/maven2" > /root/.sbt/repositories
 RUN cd /tmp && \
     git clone https://github.com/ibm-et/spark-kernel.git && \
     cd spark-kernel && \
@@ -48,13 +48,20 @@ RUN cd /tmp && \
     sbt pack
 # clean up
 RUN cd /tmp && \
-    mv kernel/target/pack /opt/sparkkernel && \
+    mv spark-kernel/kernel/target/pack /opt/sparkkernel && \
     chmod +x /opt/sparkkernel && \
     rm -rf ~/.ivy2 && \
     rm -rf ~/.sbt && \
     rm -rf /tmp/spark-kernel && \
     apt-get remove -y sbt && \
     apt-get clean
+# add hadoop-aws dependencies to spark-kernel and fix dependency issues 
+RUN cd /opt/sparkkernel && \
+    cp /usr/lib/hadoop-aws/* lib/ && \
+    rm lib/netty-3.2.2.Final.jar && \
+    rm lib/jackson-annotations-2.2.3.jar && \
+    rm lib/jackson-core-2.2.3.jar && \
+    rm lib/jackson-databind-2.2.3.jar && \
 
 # Spark and Mesos pointers
 ENV SPARK_HOME /usr/local/spark
