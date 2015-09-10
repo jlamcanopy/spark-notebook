@@ -55,13 +55,14 @@ RUN cd /tmp && \
     rm -rf /tmp/spark-kernel && \
     apt-get remove -y sbt && \
     apt-get clean
+
 # add hadoop-aws dependencies to spark-kernel and fix dependency issues 
 RUN cd /opt/sparkkernel && \
-    cp /usr/lib/hadoop-aws/* lib/ && \
+    cp /usr/local/hadoop-aws/* lib/ && \
     rm lib/netty-3.2.2.Final.jar && \
     rm lib/jackson-annotations-2.2.3.jar && \
     rm lib/jackson-core-2.2.3.jar && \
-    rm lib/jackson-databind-2.2.3.jar && \
+    rm lib/jackson-databind-2.2.3.jar
 
 # Spark and Mesos pointers
 ENV SPARK_HOME /usr/local/spark
